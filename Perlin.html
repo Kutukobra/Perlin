@@ -30,9 +30,9 @@
             ctx.imageSmoothingEnabled = false;
 
             const GRIDSIZE = 500;  // Canvas size (width and height)
-            const POINTSIZE = 200;  // Number of points for interpolation
+            const POINTSIZE = 20;  // Number of points for interpolation
             const SCALING = GRIDSIZE / POINTSIZE;
-            const SEED = 489;  // Fixed seed for reproducibility
+            const SEED = 12345;  // Fixed seed for reproducibility
 
             // Seed the random number generator
             function random(seed) {
