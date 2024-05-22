@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Interpolation</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gridCanvas" width="500" height="500"></canvas>
+    <script>
+        function larp(start, end, value) {
+            return end * value + start * (1 - value);
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const canvas = document.getElementById("gridCanvas");
+            const ctx = canvas.getContext("2d");
+            ctx.imageSmoothingEnabled = false;
+
+            const GRIDSIZE = 500;  // Canvas size (width and height)
+            const POINTSIZE = 200;  // Number of points for interpolation
+            const SCALING = GRIDSIZE / POINTSIZE;
+            const SEED = 489;  // Fixed seed for reproducibility
+
+            // Seed the random number generator
+            function random(seed) {
+                var x = Math.sin(seed++) * 10000;
+                return x - Math.floor(x);
+            }
+
+            // Initialize the points grid with random values
+            const points = [];
+            for (let i = 0; i <= POINTSIZE; i++) {
+                points[i] = [];
+                for (let j = 0; j <= POINTSIZE; j++) {
+                    points[i][j] = random(SEED + i * POINTSIZE + j);
+                }
+            }
+
+            // Initialize the grid
+            const grid = Array.from({ length: GRIDSIZE }, () => Array(GRIDSIZE).fill(0));
+
+            // Fill the grid using bilinear interpolation
+            for (let i = 0; i < GRIDSIZE; i++) {
+                for (let j = 0; j < GRIDSIZE; j++) {
+                    const x = j / SCALING;
+                    const y = i / SCALING;
+                    const x0 = Math.floor(x);
+                    const y0 = Math.floor(y);
+                    const x_diff = x - x0;
+                    const y_diff = y - y0;
+
+                    const top = larp(points[y0][x0], points[y0][x0 + 1], x_diff);
+                    const bottom = larp(points[y0 + 1][x0], points[y0 + 1][x0 + 1], x_diff);
+
+                    grid[i][j] = larp(top, bottom, y_diff);
+                }
+            }
+
+            // Render the grid on the canvas
+            for (let i = 0; i < GRIDSIZE; i++) {
+                for (let j = 0; j < GRIDSIZE; j++) {
+                    const value = grid[i][j];
+                    const shade = Math.floor(value * 255);
+                    ctx.fillStyle = `rgb(${shade},${shade},${shade})`;
+                    ctx.fillRect(j, i, 1, 1);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
